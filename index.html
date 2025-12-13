@@ -14,7 +14,7 @@ body {
     overflow: hidden;
 }
 
-/* 啟動遮罩 */
+/* 啟動畫面 */
 #startScreen {
     position: fixed;
     inset: 0;
@@ -63,8 +63,8 @@ button.gray { background: #555; }
 .snowflake {
     position: fixed;
     top: -10px;
-    animation: fall linear infinite;
     user-select: none;
+    animation: fall linear infinite;
 }
 @keyframes fall {
     to { transform: translateY(110vh); }
@@ -87,7 +87,7 @@ button.gray { background: #555; }
 
 <body>
 
-<!-- 🔓 啟動畫面 -->
+<!-- 啟動畫面 -->
 <div id="startScreen">
     <h1>🎄 聖誕交換禮物 🎄</h1>
     <button onclick="start()">👉 點我開始</button>
@@ -108,52 +108,30 @@ button.gray { background: #555; }
 
 <div id="santa">🎅🦌🦌🦌</div>
 
-<!-- 🎵 背景音樂：進入後自動播放 -->
+<!-- 🎵 背景音樂 -->
 <audio id="bgm" src="./jb.mp3" loop preload="auto"></audio>
 
 <!-- 🔊 翻牌音效 -->
 <audio id="flipSound" src="./ass.mp3" preload="auto"></audio>
 
 <script>
-const originalNames = [ "林佳正",
-    "王維宣",
-    "戴憲鵬",
-    "尹姿芳",
-    "郭芳均",
-    "古竣文",
-    "時淯祐",
-    "林翠婷",
-    "藍云汝",
-    "謝宗瑜",
-    "陳儀宸",
-    "黃國源",
-    "蘇致豪",
-    "王彥欽",
-    "鄭翔予",
-    "陳葭瑜",
-    "許桓睿",
-    "陳晢凱",
-    "張致彬",
-    "徐詩棠",
-    "蔣昇峰",
-    "凌健峰",
-    "何采穎",
-    "林菀葶",
-    "金意筎"
-                      ];
+const originalNames = [
+    "林佳正","王維宣","戴憲鵬","尹姿芳","郭芳均","古竣文","時淯祐","林翠婷",
+    "藍云汝","謝宗瑜","陳儀宸","黃國源","蘇致豪","王彥欽","鄭翔予","陳葭瑜",
+    "許桓睿","陳晢凱","張致彬","徐詩棠","蔣昇峰","凌健峰","何采穎","林菀葶","金意筎"
+];
+
 let names = [...originalNames];
 let drawing = false;
 
-/* 🔓 啟動（解鎖手機） */
+/* 點我開始：播放背景音樂 */
 function start() {
     document.getElementById("startScreen").style.display = "none";
 
     const bgm = document.getElementById("bgm");
-    bgm.volume = 0.4;        // 背景音樂音量
+    bgm.volume = 0.4;
     bgm.currentTime = 0;
-    bgm.play().catch(err => {
-        console.log("BGM 播放失敗", err);
-    });
+    bgm.play().catch(() => {});
 }
 
 /* 翻牌 */
@@ -161,55 +139,63 @@ function draw() {
     if (drawing || names.length === 0) return;
     drawing = true;
 
+    const countdownEl = document.getElementById("countdown");
+    const cardEl = document.getElementById("card");
+    const leftEl = document.getElementById("left");
     const flip = document.getElementById("flipSound");
-flip.currentTime = 0;
-flip.play().catch(err => {
-    console.log("翻牌音效失敗", err);
-});
+
+    flip.currentTime = 0;
+    flip.play().catch(() => {});
 
     let c = 3;
-    countdown.innerText = c;
+    countdownEl.innerText = c;
 
-    const t = setInterval(() => {
+    const timer = setInterval(() => {
         c--;
-        if (c > 0) countdown.innerText = c;
-        else {
-            clearInterval(t);
-            countdown.innerText = "";
-            const name = names.splice(Math.floor(Math.random()*names.length),1)[0];
-            card.innerText = "🎁 " + name;
-            left.innerText = "剩下 " + names.length + " 人";
+        if (c > 0) {
+            countdownEl.innerText = c;
+        } else {
+            clearInterval(timer);
+            countdownEl.innerText = "";
+
+            const name = names.splice(
+                Math.floor(Math.random() * names.length), 1
+            )[0];
+
+            cardEl.innerText = "🎁 " + name;
+            leftEl.innerText = "剩下 " + names.length + " 人";
+
             drawing = false;
         }
     }, 1000);
 }
 
+/* 重置 */
 function resetGame() {
     names = [...originalNames];
-    card.innerText = "";
-    left.innerText = "已重置 🎄";
+    document.getElementById("card").innerText = "";
+    document.getElementById("left").innerText = "已重置 🎄";
+    document.getElementById("countdown").innerText = "";
+    drawing = false;
 }
 
+/* 投影模式 */
 function toggleProjector() {
     document.body.classList.toggle("projector");
 }
 
 /* 雪花 */
-setInterval(()=>{
-    const s=document.createElement("div");
-    s.className="snowflake";
-    s.innerText="❄";
-    s.style.left=Math.random()*innerWidth+"px";
-    s.style.fontSize=14+Math.random()*20+"px";
-    s.style.animationDuration=5+Math.random()*5+"s";
+setInterval(() => {
+    const s = document.createElement("div");
+    s.className = "snowflake";
+    s.innerText = "❄";
+    s.style.left = Math.random() * window.innerWidth + "px";
+    s.style.fontSize = 14 + Math.random() * 20 + "px";
+    s.style.animationDuration = 5 + Math.random() * 5 + "s";
     document.body.appendChild(s);
-    setTimeout(()=>s.remove(),10000);
-},300);
+    setTimeout(() => s.remove(), 10000);
+}, 300);
 </script>
 
 </body>
 </html>
-
-
-
-
