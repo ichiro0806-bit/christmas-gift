@@ -109,7 +109,7 @@ button.gray { background: #555; }
 <div id="santa">🎅🦌🦌🦌</div>
 
 <!-- 🎵 背景音樂：進入後自動播放 -->
-<audio id="bgm" src="./JingleBells.mp3" loop preload="auto"></audio>
+<audio id="bgm" src="./jb.mp3" loop preload="auto"></audio>
 
 <!-- 🔊 翻牌音效 -->
 <audio id="flipSound" src="./ass.mp3" preload="auto"></audio>
@@ -147,8 +147,13 @@ let drawing = false;
 /* 🔓 啟動（解鎖手機） */
 function start() {
     document.getElementById("startScreen").style.display = "none";
-    document.getElementById("bell").play().catch(()=>{});
-    document.getElementById("ding").play().catch(()=>{});
+
+    const bgm = document.getElementById("bgm");
+    bgm.volume = 0.4;        // 背景音樂音量
+    bgm.currentTime = 0;
+    bgm.play().catch(err => {
+        console.log("BGM 播放失敗", err);
+    });
 }
 
 /* 翻牌 */
@@ -156,7 +161,12 @@ function draw() {
     if (drawing || names.length === 0) return;
     drawing = true;
 
-    document.getElementById("bell").play().catch(()=>{});
+    const flip = document.getElementById("flipSound");
+flip.currentTime = 0;
+flip.play().catch(err => {
+    console.log("翻牌音效失敗", err);
+});
+
     let c = 3;
     countdown.innerText = c;
 
@@ -167,7 +177,6 @@ function draw() {
             clearInterval(t);
             countdown.innerText = "";
             const name = names.splice(Math.floor(Math.random()*names.length),1)[0];
-            document.getElementById("ding").play().catch(()=>{});
             card.innerText = "🎁 " + name;
             left.innerText = "剩下 " + names.length + " 人";
             drawing = false;
@@ -200,6 +209,7 @@ setInterval(()=>{
 
 </body>
 </html>
+
 
 
 
