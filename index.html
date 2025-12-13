@@ -108,8 +108,11 @@ button.gray { background: #555; }
 
 <div id="santa">🎅🦌🦌🦌</div>
 
-<audio id="bell" src="/ass.mp3"></audio>
-<audio id="ding" src="/Jingle Bells.mp3"></audio>
+<!-- 🎵 背景音樂：進入後自動播放 -->
+<audio id="bgm" src="./JingleBells.mp3" loop preload="auto"></audio>
+
+<!-- 🔊 翻牌音效 -->
+<audio id="flipSound" src="./ass.mp3" preload="auto"></audio>
 
 <script>
 const originalNames = [ "林佳正",
@@ -196,4 +199,5 @@ setInterval(()=>{
 
 </body>
 </html>
+
 
