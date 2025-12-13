@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>🎄 聖誕交換禮物翻牌</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: radial-gradient(circle, #145a32, #0b3d2e);
+    color: white;
+    text-align: center;
+    overflow: hidden;
+}
+
+/* 啟動遮罩 */
+#startScreen {
+    position: fixed;
+    inset: 0;
+    background: #0b3d2e;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+#startScreen button {
+    font-size: 32px;
+    padding: 20px 50px;
+    border-radius: 16px;
+    border: none;
+    background: #e74c3c;
+    color: white;
+}
+
+h1 { font-size: 48px; margin-top: 40px; }
+
+button {
+    font-size: 28px;
+    padding: 16px 40px;
+    margin: 10px;
+    border: none;
+    border-radius: 14px;
+    background: #e74c3c;
+    color: white;
+}
+
+button.secondary { background: #2980b9; }
+button.gray { background: #555; }
+
+#countdown { font-size: 120px; color: #f1c40f; }
+#card { font-size: 72px; margin-top: 30px; }
+#left { font-size: 24px; opacity: 0.8; }
+
+/* 投影模式 */
+.projector h1 { font-size: 80px; }
+.projector #card { font-size: 140px; }
+.projector #countdown { font-size: 180px; }
+
+/* 雪花 */
+.snowflake {
+    position: fixed;
+    top: -10px;
+    animation: fall linear infinite;
+    user-select: none;
+}
+@keyframes fall {
+    to { transform: translateY(110vh); }
+}
+
+/* 聖誕老人 */
+#santa {
+    position: fixed;
+    top: 80px;
+    left: -300px;
+    font-size: 64px;
+    animation: fly 18s linear infinite;
+    pointer-events: none;
+}
+@keyframes fly {
+    to { transform: translateX(120vw); }
+}
+</style>
+</head>
+
+<body>
+
+<!-- 🔓 啟動畫面 -->
+<div id="startScreen">
+    <h1>🎄 聖誕交換禮物 🎄</h1>
+    <button onclick="start()">👉 點我開始</button>
+    <p>（解鎖音效 & 互動）</p>
+</div>
+
+<h1>🎄 生檢課溫馨感人行憲紀念日交換禮物 🎄</h1>
+
+<div>
+    <button id="btn" onclick="draw()">🎁 翻牌</button>
+    <button class="secondary" onclick="toggleProjector()">🖥 投影模式</button>
+    <button class="gray" onclick="resetGame()">🔁 重新開始</button>
+</div>
+
+<div id="countdown"></div>
+<div id="card"></div>
+<div id="left"></div>
+
+<div id="santa">🎅🦌🦌🦌</div>
+
+<audio id="bell" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_2c8a3c95c5.mp3"></audio>
+<audio id="ding" src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_88447c4c8e.mp3"></audio>
+
+<script>
+const originalNames = [ "林佳正",
+    "王維宣",
+    "戴憲鵬",
+    "尹姿芳",
+    "郭芳均",
+    "古竣文",
+    "時淯祐",
+    "林翠婷",
+    "藍云汝",
+    "謝宗瑜",
+    "陳儀宸",
+    "黃國源",
+    "蘇致豪",
+    "王彥欽",
+    "鄭翔予",
+    "陳葭瑜",
+    "許桓睿",
+    "陳晢凱",
+    "張致彬",
+    "徐詩棠",
+    "蔣昇峰",
+    "凌健峰",
+    "何采穎",
+    "林菀葶"
+];
+let names = [...originalNames];
+let drawing = false;
+
+/* 🔓 啟動（解鎖手機） */
+function start() {
+    document.getElementById("startScreen").style.display = "none";
+    document.getElementById("bell").play().catch(()=>{});
+    document.getElementById("ding").play().catch(()=>{});
+}
+
+/* 翻牌 */
+function draw() {
+    if (drawing || names.length === 0) return;
+    drawing = true;
+
+    document.getElementById("bell").play().catch(()=>{});
+    let c = 3;
+    countdown.innerText = c;
+
+    const t = setInterval(() => {
+        c--;
+        if (c > 0) countdown.innerText = c;
+        else {
+            clearInterval(t);
+            countdown.innerText = "";
+            const name = names.splice(Math.floor(Math.random()*names.length),1)[0];
+            document.getElementById("ding").play().catch(()=>{});
+            card.innerText = "🎁 " + name;
+            left.innerText = "剩下 " + names.length + " 人";
+            drawing = false;
+        }
+    }, 1000);
+}
+
+function resetGame() {
+    names = [...originalNames];
+    card.innerText = "";
+    left.innerText = "已重置 🎄";
+}
+
+function toggleProjector() {
+    document.body.classList.toggle("projector");
+}
+
+/* 雪花 */
+setInterval(()=>{
+    const s=document.createElement("div");
+    s.className="snowflake";
+    s.innerText="❄";
+    s.style.left=Math.random()*innerWidth+"px";
+    s.style.fontSize=14+Math.random()*20+"px";
+    s.style.animationDuration=5+Math.random()*5+"s";
+    document.body.appendChild(s);
+    setTimeout(()=>s.remove(),10000);
+},300);
+</script>
+
+</body>
+</html>
