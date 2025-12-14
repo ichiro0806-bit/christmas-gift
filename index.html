@@ -2,86 +2,88 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<title>🎄 聖誕交換禮物翻牌</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎄 聖誕交換禮物翻牌（同步版）</title>
 
 <style>
 body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: radial-gradient(circle, #145a32, #0b3d2e);
-    color: white;
-    text-align: center;
-    overflow: hidden;
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: radial-gradient(circle, #145a32, #0b3d2e);
+  color: white;
+  text-align: center;
+  overflow: hidden;
 }
 
 /* 啟動畫面 */
 #startScreen {
-    position: fixed;
-    inset: 0;
-    background: #0b3d2e;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
+  position: fixed;
+  inset: 0;
+  background: #0b3d2e;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
 }
 
 #startScreen button {
-    font-size: 32px;
-    padding: 20px 50px;
-    border-radius: 16px;
-    border: none;
-    background: #e74c3c;
-    color: white;
+  font-size: 32px;
+  padding: 20px 50px;
+  border-radius: 16px;
+  border: none;
+  background: #e74c3c;
+  color: white;
 }
 
-h1 { font-size: 48px; margin-top: 40px; }
+h1 { font-size: 44px; margin-top: 36px; }
 
 button {
-    font-size: 28px;
-    padding: 16px 40px;
-    margin: 10px;
-    border: none;
-    border-radius: 14px;
-    background: #e74c3c;
-    color: white;
+  font-size: 28px;
+  padding: 16px 40px;
+  margin: 10px;
+  border: none;
+  border-radius: 14px;
+  background: #e74c3c;
+  color: white;
+  cursor: pointer;
 }
 
 button.secondary { background: #2980b9; }
 button.gray { background: #555; }
 
-#countdown { font-size: 120px; color: #f1c40f; }
-#card { font-size: 72px; margin-top: 30px; }
-#left { font-size: 24px; opacity: 0.8; }
+#countdown { font-size: 120px; color: #f1c40f; margin-top: 10px; }
+#card { font-size: 72px; margin-top: 24px; min-height: 90px; }
+#left { font-size: 24px; opacity: 0.85; margin-top: 12px; }
 
 /* 投影模式 */
 .projector h1 { font-size: 80px; }
 .projector #card { font-size: 140px; }
 .projector #countdown { font-size: 180px; }
+.projector button { font-size: 36px; }
 
 /* 雪花 */
 .snowflake {
-    position: fixed;
-    top: -10px;
-    user-select: none;
-    animation: fall linear infinite;
+  position: fixed;
+  top: -10px;
+  user-select: none;
+  animation: fall linear infinite;
 }
-@keyframes fall {
-    to { transform: translateY(110vh); }
-}
+@keyframes fall { to { transform: translateY(110vh); } }
 
 /* 聖誕老人 */
 #santa {
-    position: fixed;
-    top: 80px;
-    left: -300px;
-    font-size: 64px;
-    animation: fly 18s linear infinite;
-    pointer-events: none;
+  position: fixed;
+  top: 80px;
+  left: -300px;
+  font-size: 64px;
+  animation: fly 18s linear infinite;
+  pointer-events: none;
+  z-index: 1;
 }
-@keyframes fly {
-    to { transform: translateX(120vw); }
-}
+@keyframes fly { to { transform: translateX(120vw); } }
+
+.projector #santa { font-size: 96px; top: 120px; }
 </style>
 </head>
 
@@ -89,17 +91,17 @@ button.gray { background: #555; }
 
 <!-- 啟動畫面 -->
 <div id="startScreen">
-    <h1>🎄 聖誕交換禮物 🎄</h1>
-    <button onclick="start()">👉 點我開始</button>
-    <p>（解鎖音效 & 互動）</p>
+  <h1>🎄 聖誕交換禮物 🎄</h1>
+  <button onclick="start()">👉 點我開始</button>
+  <p>（解鎖音效 & 互動）</p>
 </div>
 
 <h1>🎄 生檢課溫馨感人行憲紀念日交換禮物 🎄</h1>
 
 <div>
-    <button id="btn" onclick="draw()">🎁 翻牌</button>
-    <button class="secondary" onclick="toggleProjector()">🖥 投影模式</button>
-    <button class="gray" onclick="resetGame()">🔁 重新開始</button>
+  <button id="btn" onclick="draw()">🎁 翻牌</button>
+  <button class="secondary" onclick="toggleProjector()">🖥 投影模式</button>
+  <button class="gray" onclick="resetGame()">🔁 重新開始</button>
 </div>
 
 <div id="countdown"></div>
@@ -111,105 +113,18 @@ button.gray { background: #555; }
 <!-- 🎵 背景音樂 -->
 <audio id="bgm" src="./jb.mp3" loop preload="auto"></audio>
 
-<!-- 🔊 翻牌音效 -->
+<!-- 🔊 翻牌音效（名字出現瞬間） -->
 <audio id="flipSound" src="./ass.mp3" preload="auto"></audio>
-<!-- 🔊 同步音效 -->
+
+<!-- 🔊 倒數同步音效（3/2/1 每跳一次） -->
 <audio id="countSound" src="./ass.mp3" preload="auto"></audio>
 
-<script>
-const originalNames = [
-    "林佳正","王維宣","戴憲鵬","尹姿芳","郭芳均","古竣文","時淯祐","林翠婷",
-    "藍云汝","謝宗瑜","陳儀宸","黃國源","蘇致豪","王彥欽","鄭翔予","陳葭瑜",
-    "許桓睿","陳晢凱","張致彬","徐詩棠","蔣昇峰","凌健峰","何采穎","林菀葶","金意筎"
-];
-
-let names = [...originalNames];
-let drawing = false;
-
-/* 點我開始：播放背景音樂 */
-function start() {
-    document.getElementById("startScreen").style.display = "none";
-
-    const bgm = document.getElementById("bgm");
-    bgm.volume = 0.2;
-    bgm.currentTime = 0;
-    bgm.play().catch(() => {});
-}
-
-/* 翻牌 */
-function draw() {
-  const ref = db.ref();
-
-  ref.transaction(data => {
-    if (!data) return data;
-
-    // 有人正在抽 or 抽完了
-    if (data.drawing || data.names.length === 0) return;
-
-    // 上鎖 + 初始化倒數
-    data.drawing = true;
-    data.current = "";
-    data.countdown = 3;
-
-    return data;
-  }, () => {
-    // 開始倒數（雲端）
-    let c = 3;
-    const timer = setInterval(() => {
-      c--;
-
-      if (c > 0) {
-        ref.update({ countdown: c });
-      } else {
-        clearInterval(timer);
-
-        ref.transaction(data => {
-          if (!data || data.names.length === 0) return data;
-
-          const idx = Math.floor(Math.random() * data.names.length);
-          data.current = data.names.splice(idx, 1)[0];
-          data.countdown = 0;
-          data.drawing = false;
-
-          return data;
-        });
-      }
-    }, 1000);
-  });
-}
-
-
-/* 重置 */
-function resetGame() {
-    names = [...originalNames];
-    document.getElementById("card").innerText = "";
-    document.getElementById("left").innerText = "已重置 🎄";
-    document.getElementById("countdown").innerText = "";
-    drawing = false;
-}
-
-/* 投影模式 */
-function toggleProjector() {
-    document.body.classList.toggle("projector");
-}
-
-/* 雪花 */
-setInterval(() => {
-    const s = document.createElement("div");
-    s.className = "snowflake";
-    s.innerText = "❄";
-    s.style.left = Math.random() * window.innerWidth + "px";
-    s.style.fontSize = 14 + Math.random() * 20 + "px";
-    s.style.animationDuration = 5 + Math.random() * 5 + "s";
-    document.body.appendChild(s);
-    setTimeout(() => s.remove(), 10000);
-}, 300);
-</script>
+<!-- ✅ Firebase SDK（一定要在使用 db 之前） -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
-/* 🔑 貼上你自己的 firebaseConfig */
+/* 🔑 你的 firebaseConfig（原樣保留） */
 const firebaseConfig = {
   apiKey: "AIzaSyBz2naDAZZP7PVSBJPKizGwCTZbVkuW0fE",
   authDomain: "christmas-3rdalc.firebaseapp.com",
@@ -222,55 +137,163 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
-</script>
-<script>
+const rootRef = db.ref();
+
+/* DOM */
 const countdownEl = document.getElementById("countdown");
 const cardEl = document.getElementById("card");
 const leftEl = document.getElementById("left");
 
-/* 🔄 監聽雲端狀態 */
+/* 音效 */
+const bgm = document.getElementById("bgm");
+const flipSound = document.getElementById("flipSound");
+const countSound = document.getElementById("countSound");
+
+/* 用於避免監聽重複播音效 */
 let lastCountdown = 0;
 let lastName = "";
 
-db.ref().on("value", snap => {
+/* 點我開始：播放背景音樂（符合手機規則：用戶點擊觸發） */
+function start() {
+  document.getElementById("startScreen").style.display = "none";
+  bgm.volume = 0.2;
+  bgm.currentTime = 0;
+  bgm.play().catch(() => {});
+}
+
+/* A：誰都能按、第一個有效 + 同步倒數 */
+function draw() {
+  // 先用 transaction 搶鎖
+  rootRef.transaction(data => {
+    if (!data) return data;
+
+    // 需要 Firebase 裡有：names / drawing / current / countdown
+    if (!Array.isArray(data.names)) data.names = [];
+    if (typeof data.drawing !== "boolean") data.drawing = false;
+    if (typeof data.current !== "string") data.current = "";
+    if (typeof data.countdown !== "number") data.countdown = 0;
+
+    // 已有人在抽 or 抽完了
+    if (data.drawing || data.names.length === 0) return;
+
+    // 上鎖 + 初始化倒數
+    data.drawing = true;
+    data.current = "";
+    data.countdown = 3;
+    return data;
+  }, (error, committed) => {
+    if (error || !committed) return; // 沒搶到鎖就不做任何事
+
+    // 倒數由雲端欄位驅動（同步）
+    let c = 3;
+    const timer = setInterval(() => {
+      c--;
+
+      if (c > 0) {
+        rootRef.update({ countdown: c });
+      } else {
+        clearInterval(timer);
+
+        // 倒數到 0：抽人 + 解鎖
+        rootRef.transaction(data => {
+          if (!data) return data;
+          if (!Array.isArray(data.names)) data.names = [];
+          if (data.names.length === 0) {
+            data.drawing = false;
+            data.countdown = 0;
+            return data;
+          }
+
+          const idx = Math.floor(Math.random() * data.names.length);
+          data.current = data.names.splice(idx, 1)[0];
+          data.countdown = 0;
+          data.drawing = false;
+          return data;
+        });
+      }
+    }, 1000);
+  });
+}
+
+/* 重置：把 Firebase 回到初始狀態（請先在 Firebase Data 中放好 names 名單） */
+function resetGame() {
+  // 這裡不直接寫死名單，避免你每次改名單都要改程式
+  // 只把狀態清空，names 保持 Firebase 現有內容
+  rootRef.update({
+    current: "",
+    drawing: false,
+    countdown: 0
+  });
+
+  // 本地顯示先清一下（體感更好）
+  countdownEl.innerText = "";
+  cardEl.innerText = "";
+  leftEl.innerText = "已重置 🎄";
+  lastCountdown = 0;
+  lastName = "";
+}
+
+/* 投影模式 */
+function toggleProjector() {
+  document.body.classList.toggle("projector");
+}
+
+/* ❄️ 雪花 */
+setInterval(() => {
+  const s = document.createElement("div");
+  s.className = "snowflake";
+  s.innerText = "❄";
+  s.style.left = Math.random() * window.innerWidth + "px";
+  s.style.fontSize = (14 + Math.random() * 20) + "px";
+  s.style.animationDuration = (5 + Math.random() * 5) + "s";
+  document.body.appendChild(s);
+  setTimeout(() => s.remove(), 10000);
+}, 300);
+
+/* 🔄 監聽雲端狀態（同步更新畫面 + 同步播音效） */
+rootRef.on("value", snap => {
   const data = snap.val();
   if (!data) return;
 
-  leftEl.innerText = "剩下 " + data.names.length + " 人";
+  const namesLeft = Array.isArray(data.names) ? data.names.length : 0;
+  leftEl.innerText = "剩下 " + namesLeft + " 人";
 
-  /* 🔊 同步倒數音效 */
+  // 同步倒數顯示 + 同步倒數音效
   if (data.countdown > 0) {
     countdownEl.innerText = data.countdown;
     cardEl.innerText = "";
 
     if (data.countdown !== lastCountdown) {
-      const cSound = document.getElementById("countSound");
-      cSound.currentTime = 0;
-      cSound.volume = 0.6;
-      cSound.play().catch(() => {});
+      countSound.currentTime = 0;
+      countSound.volume = 0.6;
+      countSound.play().catch(() => {});
       lastCountdown = data.countdown;
     }
+    return;
+  }
 
-  } else {
-    countdownEl.innerText = "";
-    lastCountdown = 0;
+  // 倒數結束
+  countdownEl.innerText = "";
+  lastCountdown = 0;
 
-    /* 🔊 同步翻牌音效（名字出現瞬間） */
-    if (data.current && data.current !== lastName) {
-      cardEl.innerText = "🎁 " + data.current;
+  // 名字出現：同步翻牌音效
+  if (data.current && data.current !== lastName) {
+    cardEl.innerText = "🎁 " + data.current;
 
-      const flip = document.getElementById("flipSound");
-      flip.currentTime = 0;
-      flip.volume = 0.7;
-      flip.play().catch(() => {});
+    flipSound.currentTime = 0;
+    flipSound.volume = 0.7;
+    flipSound.play().catch(() => {});
 
-      lastName = data.current;
-    }
+    lastName = data.current;
+  }
+
+  // 若 current 被清空，也同步清畫面
+  if (!data.current) {
+    cardEl.innerText = "";
+    lastName = "";
   }
 });
 </script>
 
 </body>
 </html>
-
-
