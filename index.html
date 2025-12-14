@@ -56,6 +56,9 @@ button.gray { background: #555; }
 #card { font-size: 72px; margin-top: 24px; min-height: 90px; }
 #left { font-size: 24px; opacity: 0.85; margin-top: 12px; }
 
+/* 開音 */
+<button class="gray" id="muteBtn" onclick="toggleMute()">🔊 開音樂</button>
+
 /* 投影模式 */
 .projector h1 { font-size: 80px; }
 .projector #card { font-size: 140px; }
@@ -175,7 +178,39 @@ function start() {
   document.getElementById("startScreen").style.display = "none";
   bgm.volume = 0.2;
   bgm.currentTime = 0;
-  bgm.play().catch(() => {});
+  if (!isMuted) bgm.play().catch(() => {});
+  applyMuteState();
+}
+
+let isMuted = false;
+
+function applyMuteState() {
+  // HTMLAudioElement 有內建 muted 屬性，最乾淨
+  bgm.muted = isMuted;
+  flipSound.muted = isMuted;
+  countSound.muted = isMuted;
+  finalSound.muted = isMuted;
+
+  const btn = document.getElementById("muteBtn");
+  if (btn) btn.textContent = isMuted ? "🔇 靜音" : "🔊 開音樂";
+}
+
+function toggleMute() {
+  isMuted = !isMuted;
+
+  // 立刻套用
+  applyMuteState();
+
+  // 若切到靜音：立刻把正在播的聲音停掉（體感最好）
+  if (isMuted) {
+    bgm.pause(); bgm.currentTime = 0;
+    flipSound.pause(); flipSound.currentTime = 0;
+    countSound.pause(); countSound.currentTime = 0;
+    finalSound.pause(); finalSound.currentTime = 0;
+  } else {
+    // 切回開音：如果你希望背景音樂恢復（且已按過「點我開始」解鎖）
+    bgm.play().catch(() => {});
+  }
 }
 
 /* A：誰都能按、第一個有效 + 同步倒數 */
@@ -384,6 +419,15 @@ rootRef.on("value", snap => {
       finalSound.currentTime = 0;
       finalSound.volume = 0.8;
       finalSound.play().catch(() => {});
+    // 🔇 關閉背景音樂，讓 final 聽得清楚
+      bgm.pause();
+      bgm.currentTime = 0;
+    // 🏁 播放 final.mp3（若靜音則不播）
+  if (!isMuted) {
+    finalSound.currentTime = 0;
+    finalSound.volume = 0.9;
+    finalSound.play().catch(() => {});
+  }
       fireworksShow();
     }
 
@@ -399,3 +443,4 @@ rootRef.on("value", snap => {
 
 </body>
 </html>
+
