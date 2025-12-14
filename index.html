@@ -37,6 +37,11 @@ body {
 }
 
 h1 { font-size: 36px; margin-top: 36px; }
+.sub-title {
+  font-size: 24px;   /* 可再調：22 / 26 都 OK */
+  margin-top: 12px;
+  opacity: 0.9;
+}
 
 button {
   font-size: 28px;
@@ -49,18 +54,21 @@ button {
   cursor: pointer;
 }
 
+button.tool.pink {
+  background: #ff6fae;   /* 粉紅色 */
+  color: white;
+}
+
+button.tool.pink:active {
+  background: #ff4f9a;
+}
+  
 button.secondary { background: #2980b9; }
 button.gray { background: #555; }
 
 #countdown { font-size: 120px; color: #f1c40f; margin-top: 10px; }
 #card { font-size: 72px; margin-top: 24px; min-height: 90px; }
 #left { font-size: 24px; opacity: 0.85; margin-top: 12px; }
-
-/* 投影模式 */
-.projector h1 { font-size: 80px; }
-.projector #card { font-size: 140px; }
-.projector #countdown { font-size: 180px; }
-.projector button { font-size: 36px; }
 
 /* 雪花 */
 .snowflake {
@@ -82,7 +90,6 @@ button.gray { background: #555; }
   z-index: 1;
 }
 @keyframes fly { to { transform: translateX(120vw); } }
-.projector #santa { font-size: 96px; top: 120px; }
 
 /* 🎆 煙火畫布 */
 #fx{
@@ -135,7 +142,7 @@ button.tool {
 </div>
 
 <h1>🎄 生檢課 🎄</h1>
-<h1> 🎁溫馨感人行憲紀念日交換禮物🎁 </h1>
+<h1 class="sub-title">🎁溫馨感人行憲紀念日交換禮物🎁</h1>
 
 <!-- 主按鈕 -->
 <div class="main-btn">
@@ -144,9 +151,8 @@ button.tool {
 
 <!-- 小工具列 -->
 <div class="tool-bar">
-  <button class="tool" onclick="toggleProjector()">🖥 投影</button>
-  <button class="tool" onclick="resetGame()">🔁 重來</button>
-  <button class="tool" id="muteBtn" onclick="toggleMute()">🔊 音樂</button>
+ <button class="tool pink" onclick="resetGame()">🔁 重來</button>
+ <button class="tool pink" id="muteBtn" onclick="toggleMute()">🔊 音樂</button>
 </div>
 
 
@@ -310,11 +316,6 @@ function resetGame() {
   if (!isMuted) bgm.play().catch(()=>{});
 }
 
-/* 投影模式 */
-function toggleProjector() {
-  document.body.classList.toggle("projector");
-}
-
 /* 雪花 */
 setInterval(() => {
   const s = document.createElement("div");
@@ -459,4 +460,5 @@ applyMuteState();
 
 </body>
 </html>
+
 
