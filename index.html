@@ -93,6 +93,33 @@ button.gray { background: #555; }
   pointer-events: none;
   z-index: 9998;
 }
+  /* 主按鈕區 */
+.main-btn {
+  margin-top: 10px;
+}
+
+/* 小工具列（手機友善） */
+.tool-bar {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 6px;
+  flex-wrap: nowrap;
+}
+
+/* 小按鈕樣式 */
+button.tool {
+  font-size: 16px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #555;
+}
+
+/* 投影模式下工具列也稍微放大 */
+.projector button.tool {
+  font-size: 22px;
+  padding: 12px 18px;
+}
 </style>
 </head>
 
@@ -110,13 +137,18 @@ button.gray { background: #555; }
 <h1>🎄 生檢課 🎄</h1>
 <h1> 🎁溫馨感人行憲紀念日交換禮物🎁 </h1>
 
-<div>
+<!-- 主按鈕 -->
+<div class="main-btn">
   <button id="btn" onclick="draw()">🎁 按我中大獎</button>
-  <button class="secondary" onclick="toggleProjector()">🖥 投影模式</button>
-  <button class="gray" onclick="resetGame()">🔁 重新開始</button>
-  <!-- ✅ 靜音/開音按鈕：一定要放在 body 裡 -->
-  <button class="gray" id="muteBtn" onclick="toggleMute()">🔊 開音樂</button>
 </div>
+
+<!-- 小工具列 -->
+<div class="tool-bar">
+  <button class="tool" onclick="toggleProjector()">🖥 投影</button>
+  <button class="tool" onclick="resetGame()">🔁 重來</button>
+  <button class="tool" id="muteBtn" onclick="toggleMute()">🔊 音樂</button>
+</div>
+
 
 <div id="countdown"></div>
 <div id="card"></div>
@@ -427,3 +459,4 @@ applyMuteState();
 
 </body>
 </html>
+
