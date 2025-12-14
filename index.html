@@ -217,15 +217,21 @@ function draw() {
 
 /* 重置：把 Firebase 回到初始狀態（請先在 Firebase Data 中放好 names 名單） */
 function resetGame() {
-  // 這裡不直接寫死名單，避免你每次改名單都要改程式
-  // 只把狀態清空，names 保持 Firebase 現有內容
-  rootRef.update({
-    current: "",
-    drawing: false,
-    countdown: 0
+  rootRef.transaction(data => {
+    if (!data) return data;
+
+    // fullNames 必須存在（在 Firebase Data 放好）
+    const full = Array.isArray(data.fullNames) ? data.fullNames : [];
+
+    data.names = [...full];      // ✅ 名單回填
+    data.current = "";
+    data.drawing = false;
+    data.countdown = 0;
+
+    return data;
   });
 
-  // 本地顯示先清一下（體感更好）
+  // 本地顯示先清一下（體感）
   countdownEl.innerText = "";
   cardEl.innerText = "";
   leftEl.innerText = "已重置 🎄";
@@ -297,4 +303,5 @@ rootRef.on("value", snap => {
 
 </body>
 </html>
+
 
