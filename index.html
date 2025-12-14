@@ -14,10 +14,7 @@ body {
   text-align: center;
   overflow: hidden;
 }
-  
-/* 煙火畫布 */
-<canvas id="fx"></canvas>
-  
+
 /* 啟動畫面 */
 #startScreen {
   position: fixed;
@@ -85,9 +82,9 @@ button.gray { background: #555; }
   z-index: 1;
 }
 @keyframes fly { to { transform: translateX(120vw); } }
-
 .projector #santa { font-size: 96px; top: 120px; }
 
+/* 🎆 煙火畫布 */
 #fx{
   position: fixed;
   inset: 0;
@@ -96,11 +93,13 @@ button.gray { background: #555; }
   pointer-events: none;
   z-index: 9998;
 }
-  
 </style>
 </head>
 
 <body>
+
+<!-- 🎆 正確位置：放在 body 裡（不要放在 style 裡） -->
+<canvas id="fx"></canvas>
 
 <!-- 啟動畫面 -->
 <div id="startScreen">
@@ -136,7 +135,6 @@ button.gray { background: #555; }
 <!-- 🏁 最後一人音樂 -->
 <audio id="finalSound" src="./final.mp3" preload="auto"></audio>
 
-
 <!-- ✅ Firebase SDK（一定要在使用 db 之前） -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -166,8 +164,9 @@ const leftEl = document.getElementById("left");
 const bgm = document.getElementById("bgm");
 const flipSound = document.getElementById("flipSound");
 const countSound = document.getElementById("countSound");
+const finalSound = document.getElementById("finalSound");
 
-/* 用於避免監聽重複播音效 */
+/* 避免監聽重複播音效 */
 let lastCountdown = 0;
 let lastName = "";
 
@@ -181,41 +180,35 @@ function start() {
 
 /* A：誰都能按、第一個有效 + 同步倒數 */
 function draw() {
-  // 先用 transaction 搶鎖
   rootRef.transaction(data => {
     if (!data) return data;
 
-    // 需要 Firebase 裡有：names / drawing / current / countdown
     if (!Array.isArray(data.names)) data.names = [];
     if (typeof data.drawing !== "boolean") data.drawing = false;
     if (typeof data.current !== "string") data.current = "";
     if (typeof data.countdown !== "number") data.countdown = 0;
 
-    // 已有人在抽 or 抽完了
     if (data.drawing || data.names.length === 0) return;
 
-    // 上鎖 + 初始化倒數
     data.drawing = true;
     data.current = "";
     data.countdown = 3;
     return data;
   }, (error, committed) => {
-    if (error || !committed) return; // 沒搶到鎖就不做任何事
+    if (error || !committed) return;
 
-    // 倒數由雲端欄位驅動（同步）
     let c = 3;
     const timer = setInterval(() => {
       c--;
-
       if (c > 0) {
         rootRef.update({ countdown: c });
       } else {
         clearInterval(timer);
 
-        // 倒數到 0：抽人 + 解鎖
         rootRef.transaction(data => {
           if (!data) return data;
           if (!Array.isArray(data.names)) data.names = [];
+
           if (data.names.length === 0) {
             data.drawing = false;
             data.countdown = 0;
@@ -233,23 +226,18 @@ function draw() {
   });
 }
 
-/* 重置：把 Firebase 回到初始狀態（請先在 Firebase Data 中放好 names 名單） */
+/* 重置：回填名單（需要 Firebase 有 fullNames） */
 function resetGame() {
   rootRef.transaction(data => {
     if (!data) return data;
-
-    // fullNames 必須存在（在 Firebase Data 放好）
     const full = Array.isArray(data.fullNames) ? data.fullNames : [];
-
-    data.names = [...full];      // ✅ 名單回填
+    data.names = [...full];
     data.current = "";
     data.drawing = false;
     data.countdown = 0;
-
     return data;
   });
 
-  // 本地顯示先清一下（體感）
   countdownEl.innerText = "";
   cardEl.innerText = "";
   leftEl.innerText = "已重置 🎄";
@@ -274,6 +262,7 @@ setInterval(() => {
   setTimeout(() => s.remove(), 10000);
 }, 300);
 
+/* 🎆 煙火（彩色） */
 const fx = document.getElementById("fx");
 const ctx = fx.getContext("2d");
 
@@ -288,15 +277,7 @@ resizeFx();
 let particles = [];
 let fxRunning = false;
 
-const FIRE_COLORS = [
-  "#ff5252", // 紅
-  "#ff9800", // 橘
-  "#ffeb3b", // 黃
-  "#4caf50", // 綠
-  "#03a9f4", // 藍
-  "#9c27b0", // 紫
-  "#ffffff"  // 白
-];
+const FIRE_COLORS = ["#ff5252","#ff9800","#ffeb3b","#4caf50","#03a9f4","#9c27b0","#ffffff"];
 
 function burst(x, y, power=1){
   const n = Math.floor(60 * power);
@@ -324,11 +305,10 @@ function runFx(){
   (function tick(){
     ctx.clearRect(0,0,window.innerWidth,window.innerHeight);
 
-    // 粒子更新
     for (let i = particles.length - 1; i >= 0; i--){
       const p = particles[i];
       p.life -= 1;
-      p.vy += 0.08;      // 重力
+      p.vy += 0.08;
       p.vx *= 0.99;
       p.vy *= 0.99;
       p.x += p.vx;
@@ -352,7 +332,6 @@ function runFx(){
   })();
 }
 
-// 連續煙火（用於最後一人）
 function fireworksShow(){
   const rounds = 8;
   let k = 0;
@@ -365,8 +344,7 @@ function fireworksShow(){
   }, 250);
 }
 
-  
-/* 🔄 監聽雲端狀態（同步更新畫面 + 同步播音效） */
+/* 🔄 監聽雲端狀態（同步更新畫面 + 同步播音效 + 同步煙火/最後一人） */
 rootRef.on("value", snap => {
   const data = snap.val();
   if (!data) return;
@@ -374,7 +352,6 @@ rootRef.on("value", snap => {
   const namesLeft = Array.isArray(data.names) ? data.names.length : 0;
   leftEl.innerText = "剩下 " + namesLeft + " 人";
 
-  // 同步倒數顯示 + 同步倒數音效
   if (data.countdown > 0) {
     countdownEl.innerText = data.countdown;
     cardEl.innerText = "";
@@ -388,34 +365,35 @@ rootRef.on("value", snap => {
     return;
   }
 
-  // 倒數結束
   countdownEl.innerText = "";
   lastCountdown = 0;
 
-  // 名字出現：同步翻牌音效
- if (data.current && data.current !== lastName) {
-  cardEl.innerText = "🎁 " + data.current;
+  if (data.current && data.current !== lastName) {
+    cardEl.innerText = "🎁 " + data.current;
 
-  // 🎆 抽到人就放一發煙火（大家同步看到）
-  burst(window.innerWidth * 0.5, 140, 1);
+    // 🎆 每次抽到都放一發煙火
+    burst(window.innerWidth * 0.5, 140, 1);
 
-  // 🔊 抽到人同步音效
-  flipSound.currentTime = 0;
-  flipSound.volume = 0.7;
-  flipSound.play().catch(() => {});
+    // 🔊 同步翻牌音效
+    flipSound.currentTime = 0;
+    flipSound.volume = 0.7;
+    flipSound.play().catch(() => {});
 
-  // 🏁 最後一人特效：剩下 0 人時播放 final.mp3 + 連續煙火
-  const leftCount = Array.isArray(data.names) ? data.names.length : 0;
-  if (leftCount === 0) {
-    const finalSound = document.getElementById("finalSound");
-    finalSound.currentTime = 0;
-    finalSound.volume = 0.8;
-    finalSound.play().catch(() => {});
-    fireworksShow();
+    // 🏁 最後一人：final.mp3 + 連續煙火秀
+    if (namesLeft === 0) {
+      finalSound.currentTime = 0;
+      finalSound.volume = 0.8;
+      finalSound.play().catch(() => {});
+      fireworksShow();
+    }
+
+    lastName = data.current;
   }
 
-  lastName = data.current;
-}
+  if (!data.current) {
+    cardEl.innerText = "";
+    lastName = "";
+  }
 });
 </script>
 
