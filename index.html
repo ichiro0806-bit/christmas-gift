@@ -113,6 +113,8 @@ button.gray { background: #555; }
 
 <!-- 🔊 翻牌音效 -->
 <audio id="flipSound" src="./ass.mp3" preload="auto"></audio>
+<!-- 🔊 同步音效 -->
+<audio id="countSound" src="./ass.mp3" preload="auto"></audio>
 
 <script>
 const originalNames = [
@@ -136,40 +138,46 @@ function start() {
 
 /* 翻牌 */
 function draw() {
-    if (drawing || names.length === 0) return;
-    drawing = true;
+  const ref = db.ref();
 
-    const countdownEl = document.getElementById("countdown");
-    const cardEl = document.getElementById("card");
-    const leftEl = document.getElementById("left");
-    const flip = document.getElementById("flipSound");
+  ref.transaction(data => {
+    if (!data) return data;
 
-    flip.currentTime = 0;
-    flip.volume = 0.8;
-    flip.play().catch(() => {});
+    // 有人正在抽 or 抽完了
+    if (data.drawing || data.names.length === 0) return;
 
+    // 上鎖 + 初始化倒數
+    data.drawing = true;
+    data.current = "";
+    data.countdown = 3;
+
+    return data;
+  }, () => {
+    // 開始倒數（雲端）
     let c = 3;
-    countdownEl.innerText = c;
-
     const timer = setInterval(() => {
-        c--;
-        if (c > 0) {
-            countdownEl.innerText = c;
-        } else {
-            clearInterval(timer);
-            countdownEl.innerText = "";
+      c--;
 
-            const name = names.splice(
-                Math.floor(Math.random() * names.length), 1
-            )[0];
+      if (c > 0) {
+        ref.update({ countdown: c });
+      } else {
+        clearInterval(timer);
 
-            cardEl.innerText = "🎁 " + name;
-            leftEl.innerText = "剩下 " + names.length + " 人";
+        ref.transaction(data => {
+          if (!data || data.names.length === 0) return data;
 
-            drawing = false;
-        }
+          const idx = Math.floor(Math.random() * data.names.length);
+          data.current = data.names.splice(idx, 1)[0];
+          data.countdown = 0;
+          data.drawing = false;
+
+          return data;
+        });
+      }
     }, 1000);
+  });
 }
+
 
 /* 重置 */
 function resetGame() {
@@ -197,7 +205,72 @@ setInterval(() => {
     setTimeout(() => s.remove(), 10000);
 }, 300);
 </script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script>
+/* 🔑 貼上你自己的 firebaseConfig */
+const firebaseConfig = {
+  apiKey: "AIzaSyBz2naDAZZP7PVSBJPKizGwCTZbVkuW0fE",
+  authDomain: "christmas-3rdalc.firebaseapp.com",
+  databaseURL: "https://christmas-3rdalc-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "christmas-3rdalc",
+  storageBucket: "christmas-3rdalc.firebasestorage.app",
+  messagingSenderId: "480438610552",
+  appId: "1:480438610552:web:83397c3eb58ae9a747db8d"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+</script>
+<script>
+const countdownEl = document.getElementById("countdown");
+const cardEl = document.getElementById("card");
+const leftEl = document.getElementById("left");
+
+/* 🔄 監聽雲端狀態 */
+let lastCountdown = 0;
+let lastName = "";
+
+db.ref().on("value", snap => {
+  const data = snap.val();
+  if (!data) return;
+
+  leftEl.innerText = "剩下 " + data.names.length + " 人";
+
+  /* 🔊 同步倒數音效 */
+  if (data.countdown > 0) {
+    countdownEl.innerText = data.countdown;
+    cardEl.innerText = "";
+
+    if (data.countdown !== lastCountdown) {
+      const cSound = document.getElementById("countSound");
+      cSound.currentTime = 0;
+      cSound.volume = 0.6;
+      cSound.play().catch(() => {});
+      lastCountdown = data.countdown;
+    }
+
+  } else {
+    countdownEl.innerText = "";
+    lastCountdown = 0;
+
+    /* 🔊 同步翻牌音效（名字出現瞬間） */
+    if (data.current && data.current !== lastName) {
+      cardEl.innerText = "🎁 " + data.current;
+
+      const flip = document.getElementById("flipSound");
+      flip.currentTime = 0;
+      flip.volume = 0.7;
+      flip.play().catch(() => {});
+
+      lastName = data.current;
+    }
+  }
+});
+</script>
 
 </body>
 </html>
+
 
