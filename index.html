@@ -7,6 +7,7 @@
 
 <style>
 body {
+  
   margin: 0;
   font-family: Arial, sans-serif;
   background: radial-gradient(circle, #145a32, #0b3d2e);
@@ -127,6 +128,30 @@ button.tool {
   font-size: 22px;
   padding: 12px 18px;
 }
+
+  /* 🔐 密碼門樣式 */
+#lockScreen {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle, #3b0a2a, #140010);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+}
+
+#lockScreen h1 {
+  font-size: 36px;
+  margin-bottom: 12px;
+}
+
+#lockScreen p {
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
 </style>
 </head>
 
@@ -134,6 +159,26 @@ button.tool {
 
 <canvas id="fx"></canvas>
 
+<!-- 🔐 密碼門 -->
+<div id="lockScreen">
+  <h1>🔐 請先大喊林佳正是大帥哥</h1>
+  <p>請輸入活動密碼</p>
+
+  <input
+    id="pwdInput"
+    type="password"
+    placeholder="請輸入密碼"
+    style="font-size:20px;padding:10px;border-radius:8px;border:none;"
+  />
+
+  <br><br>
+
+  <button onclick="checkPassword()">進入活動 🎄</button>
+
+  <p id="pwdError" style="color:#ffb3b3;display:none;">密碼錯誤</p>
+</div>
+
+  
 <!-- 啟動畫面 -->
 <div id="startScreen">
   <h1>🎄 生檢課交換禮物 🎄</h1>
@@ -176,6 +221,32 @@ button.tool {
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
+
+  // 🔐 設定活動密碼（自己改這裡）
+const EVENT_PASSWORD = "byebye2025";
+
+// 檢查密碼
+function checkPassword() {
+  const input = document.getElementById("pwdInput").value;
+  const error = document.getElementById("pwdError");
+
+  if (input === EVENT_PASSWORD) {
+    document.getElementById("lockScreen").style.display = "none";
+
+    // 可選：記住這台裝置（重新整理不用再輸入）
+    sessionStorage.setItem("xmasUnlocked", "1");
+  } else {
+    error.style.display = "block";
+  }
+}
+
+// 重新整理後自動解鎖（同一分頁）
+if (sessionStorage.getItem("xmasUnlocked") === "1") {
+  window.addEventListener("load", () => {
+    document.getElementById("lockScreen").style.display = "none";
+  });
+}
+
 /* Firebase config */
 const firebaseConfig = {
   apiKey: "AIzaSyBz2naDAZZP7PVSBJPKizGwCTZbVkuW0fE",
@@ -460,5 +531,6 @@ applyMuteState();
 
 </body>
 </html>
+
 
 
